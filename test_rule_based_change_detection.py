@@ -77,7 +77,23 @@ def test_detect_rule_based_change_detection():
     # assert(found_change_at == 20)
     assert(True)
 
-
+def test_detect_rule_based_change_detection_largefile():
+    csvFilePath = "datasets/KSTest.csv"
+    with open(csvFilePath, newline='') as csvfile:
+        test_transactions = list(csv.reader(csvfile))
+        gen = rule_based_change_detection(
+            test_transactions,
+            min_confidence=0.90,
+            min_lift=1.00,
+            min_support=0.05,
+            initial_window_size=100000,
+            check_interval=10000)
+        found_change_at = -1
+        for (transaction_num) in gen:
+            print("Detected change at tid {}".format(transaction_num))
+            found_change_at = transaction_num
+        assert(found_change_at > 800000)
+    
 # def test_cdtds():
 #     csvFilePath = "datasets/mushroom.csv"
 #     with open(csvFilePath, newline='') as csvfile:
@@ -92,3 +108,4 @@ def test_detect_rule_based_change_detection():
 #             print("Detected change at tid {}".format(transaction_num))
 
 test_detect_rule_based_change_detection()
+test_detect_rule_based_change_detection_largefile()

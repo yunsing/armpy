@@ -48,6 +48,8 @@ def is_closed_itemset(itemset, inverted_index):
     count = inverted_index.count(itemset)
     for sub_set in (frozenset(x) for x in powerset(itemset)):
         if inverted_index.count(sub_set) == count:
-            print("{} is not closed because {} also has support {}".format(itemset, sub_set, count))
+            print(
+                "{} is not closed because {} also has support {}".format(
+                    itemset, sub_set, count))
             return False
     return True

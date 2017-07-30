@@ -20,13 +20,14 @@ def rule_based_change_detection(
         initial_window_size,
         check_interval):
     assert(min_confidence > 0 and min_confidence <= 1)
-    assert(min_lift > 0 and min_lift <= 1)
+   ## assert(min_lift > 0 and min_lift <= 1)
     assert(min_support > 0 and min_support <= 1)
     window = []
     num_transaction = 0
     next_check = initial_window_size + check_interval
     closed_itemsets = dict()
-    for transaction in transactions: #[list(map(Item, t)) for t in transactions]:
+    # [list(map(Item, t)) for t in transactions]:
+    for transaction in transactions:
         num_transaction += 1
         window.append(transaction)
         if num_transaction < initial_window_size:
@@ -61,10 +62,14 @@ def rule_based_change_detection(
         # window of unmined transactions.
         new_closed_itemsets_count = Counter()
         for t in window:
+            ragbag = True
             for subset in powerset(t):
                 itemset = tuple(sorted(list(subset)))
                 if itemset in closed_itemsets:
                     new_closed_itemsets_count[itemset] += 1
+                    ragbag = False
+            if ragbag == True:
+                new_closed_itemsets_count["ragbag"] += 1
 
         old = []
         new = []
@@ -72,16 +77,15 @@ def rule_based_change_detection(
         for item in closed_itemsets.keys():
             old.append(closed_itemsets[item])
             new.append(new_closed_itemsets_count[item] / len(window))
+        old.append(0)
+        new.append(new_closed_itemsets_count["ragbag"] / len(window))
 
         (statistic, pvalue) = scipy.stats.ks_2samp(old, new)
         print("ks_2samp=({},{})".format(statistic, pvalue))
         if pvalue < 0.05:
             # Change detected!
             print("Change detected at transaction_num={}".format(transaction_num))
+            yield (transaction_num)
 
         next_check = num_transaction + check_interval
         window = []
-
-
-
-
